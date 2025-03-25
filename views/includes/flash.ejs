@@ -1,0 +1,27 @@
+<% if(success && success.length){ %>
+    <div class="alert alert-success text-center col-6 offset-3" role="alert" id="successMessage">
+        <%= success %>    
+    </div>
+    <script>
+      setTimeout(function() {
+        var alertBox = document.getElementById("successMessage");
+        if (alertBox) {
+          alertBox.style.display = "none";
+        }
+      }, 5000);
+    </script>
+<% } %>
+
+<% if(error && error.length){ %>
+    <div class="alert alert-danger text-center col-6 offset-3" role="alert" id="errorMessage">
+        <%= error %>    
+    </div>
+    <script>
+      setTimeout(function() {
+        var alertBox = document.getElementById("errorMessage");
+        if (alertBox) {
+          alertBox.style.display = "none";
+        }
+      }, 5000);
+    </script>
+<% } %>
