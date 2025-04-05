@@ -144,3 +144,83 @@ font-size: 1.2rems;
     height: 50vh;
     
 }
+
+/* map */
+#map {
+    height: 50vh
+}
+
+  /* nav category icon  */
+  #filters {
+    display: flex;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    gap: 2rem;
+    padding: 1rem;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  
+  #filters::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .filter {
+    flex: 0 0 auto;
+    text-align: center;
+    opacity: 0.7;
+  }
+  
+  .filter:hover {
+    opacity: 1;
+    cursor: pointer;
+  }
+  
+  .nav-scroll-wrapper {
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  
+  .tax-toggle {
+    border: 2px solid rgba(40, 38, 38, 0.852);
+    border-radius: 20px;
+    padding: 0.5rem 1rem;
+    height: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+  }
+  
+  .tax-toggle label {
+    margin-left: 0.5rem;
+    font-size: 0.9rem;
+    color: rgb(0, 0, 0);
+  }
+  
+  @media screen and (max-width: 768px) {
+    .tax-toggle {
+      display: none !important;
+    }
+  }
+  
+  /* Initial style for the toggle */
+  .form-check-input {
+      box-shadow: 0 0 2px 1px black; /* blue glow */
+    }
+  
+    /* Glow effect when checked */
+    .form-check-input:checked {
+      box-shadow: 0 0 5px 1px #0d6efd; /* blue glow */
+      background-color: #0d6efd;
+      border-color: #0d6efd;
+    }
+
+  .tax-info {
+    color: gray;
+    font-size: 0.9rem;
+    margin-left: 5px;
+  }
+  

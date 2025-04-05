@@ -3,7 +3,7 @@
     <div class="row mt-3">
         <div class="col-8 offset-2">
             <h3>Edit your Listing</h3>
-            <form method="POST" action="/listings/<%=listing._id%>?_method=PUT" novalidate class="needs-validation">
+            <form method="POST" action="/listings/<%=listing._id%>?_method=PUT" novalidate class="needs-validation" enctype="multipart/form-data">
                 <div class="mb-3">
                     <label for="title" class="form-label">Title</label>
                     <input name="listing[title]" value="<%=listing.title%>" type="text" class="form-control" required>
@@ -17,14 +17,15 @@
                 </div>
 
                 <div class="mb-3">
-                    <label for="image" class="form-label">Image</label>
-                    <input name="listing[image][url]" value="<%= listing.image && listing.image.url ? listing.image.url : '' %>" type="text" class="form-control">
+                    <label for="image" class="form-label"> Uploud New Image</label>
+                    <input name="listing[image]" type="file" class="form-control">
                     <div class="valid-feedback">Image added</div>
                     <br>
                     <!-- mini preview image -->
                     <% if (listing.image && listing.image.url) { %>
                         <div class="image-container mt-2 position-relative">
-                            <img src="<%= listing.image.url %>" alt="Listing Image" class="img-fluid" style="max-width: 200px; max-height: 200px;">
+                            <div style="text-align: center;">Original listing image</div>
+                            <img src="<%= originalImageUrl %>" alt="Listing Image" class="img-fluid" style="max-width: 200px; max-height: 200px;">
                             <div class="image-overlay">Preview</div>
                         </div>
                     <% } %>            

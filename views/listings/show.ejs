@@ -1,4 +1,9 @@
 <% layout("/layouts/boilerplate")%>
+<script>
+    let mapToken = "<%=process.env.MAP_TOKEN %>";
+    let listing = <%- JSON.stringify(listing)%>;
+
+</script>
 <div class="container mt-3">
     <div class="row justify-content-center">
         <div class="col-md-8">
@@ -34,9 +39,25 @@
             <% if (currUser) { %>
             <h4>Leave a Review</h4>
             <form action="/listings/<%= listing._id %>/reviews" method="POST" class="mb-3 mt-3 needs-validation" novalidate>
-                <div class="mb-3 mt-3">
+                <!-- <div class="mb-3 mt-3">
                     <label for="rating" class="form-label">Rating</label>
                     <input type="range" class="form-range" min="1" max="5" id="rating" name="review[rating]">
+                </div> -->
+                <div class="mb-3 mt-3">
+                    <label for="rating" class="form-label">Rating</label>
+                <fieldset class="starability-slot">
+                    <input type="radio" id="no-rate" class="input-no-rate" name="review[rating]" value="1" checked aria-label="No rating." />
+                    <input type="radio" id="first-rate1" name="review[rating]" value="1" />
+                    <label for="first-rate1" title="Terrible">1 star</label>
+                    <input type="radio" id="first-rate2" name="review[rating]" value="2" />
+                    <label for="first-rate2" title="Not good">2 stars</label>
+                    <input type="radio" id="first-rate3" name="review[rating]" value="3" />
+                    <label for="first-rate3" title="Average">3 stars</label>
+                    <input type="radio" id="first-rate4" name="review[rating]" value="4" />
+                    <label for="first-rate4" title="Very good">4 stars</label>
+                    <input type="radio" id="first-rate5" name="review[rating]" value="5" />
+                    <label for="first-rate5" title="Amazing">5 stars</label>
+                  </fieldset>
                 </div>
                 <div class="mb-3 mt-3">
                     <label for="comment" class="form-label">Comment:</label>
@@ -48,15 +69,19 @@
             </form>
         <!-- Show review  -->
             <hr />
-            <p><b>All Reviews</b></p>
+            <% if(listing.reviews.length > 0) {%>
             <div class="row">
+                <p><b>All Reviews</b></p>
                 <% for (review of listing.reviews) { %>
                     <div class="col-md-6 col-lg-6 mb-3">
                         <div class="card">
                             <div class="card-body">
-                                <h5 class="card-title">@<%= review.author.username%></h5>
+                                <div class="d-flex">
+                                    <h5 class="card-title">@<%= review.author.username%></h5>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                    <p class="starability-result class-text" data-rating="<%= review.rating %>"></p>
+                                </div>
                                 <p class="card-text"><%= review.comment %></p>
-                                <p class="card-text"><%= review.rating %> stars</p>
                             </div>
                             <div class="d-flex justify-content-between align-items-center px-3 mb-3">
                                 <div></div> <!-- Empty div to push button to the right -->
@@ -68,8 +93,12 @@
                     </div>
                 <% } %>
             </div>
-            
+            <% }%>
+            <div class="container mt-3">
+                <h3>Where you'll be</h3>
+                <div id="map"></div>
+            </div>
         </div>
     </div>
 </div>
-
+<script src="/js/map.js"></script>

@@ -1,21 +1,92 @@
 <% layout("/layouts/boilerplate")%>
-<body>
-  <h3>All Listings</h3>
-  <div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1">
-    <% for(let listing of allListings) { %>
-      <div class="card col mt-3">
-        <a href="/listings/<%=listing._id%>" class="listing-link">
-          <img src="<%=listing.image.url%>" class="card-img-top" alt="<%=listing.title%>" style="height:20rem;"/>
-          <div class="card-img-overlay"><b>Dino-king</b></div>
-          <div class="card-body">
-            <p class="card-text">
-              <b><%=listing.title%></b>
-              <br>
-              &#8377;<%=listing.price.toLocaleString("en-IN")%>/night
-            </p>
-          </div>
-        </a>
-      </div>
-    <% } %>
+<div class="nav-scroll-wrapper">
+  <div id="filters">
+    <div class="filter"><i class="fa-solid fa-fire"></i><p>Trending</p></div>
+    <div class="filter"><i class="fa-solid fa-bed"></i><p>Rooms</p></div>
+    <div class="filter"><i class="fa-solid fa-warehouse"></i><p>Farms</p></div>
+    <div class="filter"><i class="fa-solid fa-city"></i><p>Iconic cities</p></div>
+    <div class="filter"><i class="fa-solid fa-umbrella-beach"></i><p>Beach</p></div>
+    <div class="filter"><i class="fa-solid fa-person-skating"></i><p>Surfing</p></div>
+    <div class="filter"><i class="fa-solid fa-igloo"></i><p>Igloo</p></div>
+    <div class="filter"><i class="fa-solid fa-ferry"></i><p>OMG!</p></div>
+    <div class="filter"><i class="fa-solid fa-water"></i><p>Lakefront</p></div>
+    <div class="filter"><i class="fa-solid fa-mountain-city"></i><p>Mountain</p></div>
+    <div class="filter"><i class="fa-solid fa-gem"></i><p>Hidden gems</p></div>
+    <div class="filter"><i class="fa-solid fa-person-hiking"></i><p>Tracking</p></div>
+    <div class="filter"><i class="fa-brands fa-fort-awesome"></i><p>Castle</p></div>
+    <div class="filter"><i class="fa-solid fa-tree"></i><p>Treehouse</p></div>
+    <div class="filter"><i class="fa-solid fa-campground"></i><p>Cabins</p></div>
+    <div class="filter"><i class="fa-solid fa-couch"></i><p>Tiny homes</p></div>
+    <div class="filter"><i class="fa-solid fa-house-flood-water"></i><p>Floating homes</p></div>
+    <div class="filter"><i class="fa-solid fa-caravan"></i><p>Camper vans</p></div>
+    <div class="filter"><i class="fa-solid fa-snowflake"></i><p>Arctic</p></div>
+    <div class="filter"><i class="fa-solid fa-landmark-dome"></i><p>Historical</p></div>
+    <div class="filter"><i class="fa-solid fa-masks-theater"></i><p>Cultural stays</p></div>
+    <div class="filter"><i class="fa-solid fa-shield-dog"></i><p>Pet-friendly</p></div>
   </div>
-</body>
+
+  <div class="filter tax-toggle">
+    <div class="form-check-reverse form-switch">
+      <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault">
+      <label class="form-check-label" for="flexSwitchCheckDefault"><b>Display total after taxes</b></label>
+    </div>
+  </div>
+</div>
+
+<!-- -----------------listings----------------------------------- -->
+
+<div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1">
+  <% for(let listing of allListings) { %>
+    <div class="card col mt-3">
+      <a href="/listings/<%=listing._id%>" class="listing-link">
+        <img src="<%=listing.image.url%>" class="card-img-top" alt="<%=listing.title%>" style="height:20rem;"/>
+        <div class="card-img-overlay"><b>Dino-king</b></div>
+        <div class="card-body">
+          <p class="card-text">
+            <b><%=listing.title%></b><br>
+            &#8377;<span class="price" data-base="<%=listing.price%>"><%=listing.price.toLocaleString("en-IN")%></span>/night
+            <i class="tax-info" style="display: none;">(18% GST Included)</i>
+          </p>          
+        </div>
+      </a>
+    </div>
+  <% } %>
+</div>
+
+<script>
+  const filters = document.getElementById('filters')
+
+  // Swipe support
+  let startX = 0;
+  filters.addEventListener('touchstart', e => {
+    startX = e.touches[0].clientX;
+  });
+
+  filters.addEventListener('touchmove', e => {
+    const moveX = e.touches[0].clientX;
+    const diff = startX - moveX;
+    filters.scrollLeft += diff;
+    startX = moveX;
+  });
+
+  let taxSwitch = document.getElementById("flexSwitchCheckDefault");
+
+  taxSwitch.addEventListener("click", () => {
+  let priceElements = document.getElementsByClassName("price");
+  let taxInfos = document.getElementsByClassName("tax-info");
+
+  for (let i = 0; i < priceElements.length; i++) {
+    let elem = priceElements[i];
+    let basePrice = parseFloat(elem.getAttribute("data-base"));
+    
+    if (taxSwitch.checked) {
+      let gstPrice = Math.round(basePrice * 1.18);
+      elem.textContent = gstPrice.toLocaleString("en-IN");
+      taxInfos[i].style.display = "inline";
+    } else {
+      elem.textContent = basePrice.toLocaleString("en-IN");
+      taxInfos[i].style.display = "none";
+    }
+  }
+});
+</script>

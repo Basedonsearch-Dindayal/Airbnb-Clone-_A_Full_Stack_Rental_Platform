@@ -16,15 +16,27 @@ const listingSchema = new Schema({
   country: { type: String, required: true, trim: true },
   reviews: [
     {
+      type: Schema.Types.ObjectId,
+      ref: "Review",
+    }
+  ],
+  owner: {
     type: Schema.Types.ObjectId,
-    ref: "Review",
+    ref: "User",
+  },
+  geometry: {
+    type: {
+      type: String, // Don't do `{ location: { type: String } }`
+      enum: ['Point'], // 'location.type' must be 'Point'
+      required: true
+    },
+    coordinates: {
+      type: [Number],
+      required: true
+    }
   }
-],
-owner:{
-  type: Schema.Types.ObjectId,
-  ref: "User",
-},
-});
+}); // Corrected missing closing brackets
+
 
 // Middleware to set default image if none is provided
 listingSchema.pre("save", function (next) {

@@ -1,9 +1,14 @@
 <% layout("/layouts/boilerplate") %>
-<div class="row mt-3">
-    <div class="alert alert-danger  col-6 offset-3" role="alert">
-        A simple danger alert—check it out!
-        <svg class="bi flex-shrink-0 me-2" role="img" aria-label="Danger:"><use xlink:href="#exclamation-triangle-fill"/></svg>
-        <p class="alert-heading"><%=message%></p>
-        
+<div class="row mt-4">
+  <div class="col-md-6 offset-md-3">
+    <div class="alert alert-danger alert-dismissible fade show text-center shadow-sm rounded-3 py-3 px-2" role="alert">
+      <div class="d-flex flex-column align-items-center justify-content-center">
+        <svg class="bi mb-1" width="24" height="24" role="img" aria-label="Danger:">
+          <use xlink:href="#exclamation-triangle-fill" />
+        </svg>
+        <span class="fw-semibold"><%= message %></span>
+      </div>
+      <button type="button" class="btn-close position-absolute top-0 end-0 m-2" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
+  </div>
 </div>
