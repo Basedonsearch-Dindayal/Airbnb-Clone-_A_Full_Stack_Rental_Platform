@@ -24,6 +24,16 @@ const userRouter = require("./routes/user.js");
 
 // MongoDB Connection
 const dbUrl = process.env.ATLASDB_URL;
+
+function hasDatabaseName(uri) {
+    try {
+        const parsed = new URL(uri);
+        return parsed.pathname && parsed.pathname !== "/";
+    } catch {
+        return false;
+    }
+}
+
 async function connectDatabase() {
     if (!dbUrl) {
         const msg = "ATLASDB_URL is not set.";
@@ -32,6 +42,14 @@ async function connectDatabase() {
         }
         console.error(`${msg} Running without database connection in development.`);
         return;
+    }
+
+    if (!dbUrl.startsWith("mongodb://") && !dbUrl.startsWith("mongodb+srv://")) {
+        throw new Error("ATLASDB_URL must start with mongodb:// or mongodb+srv://");
+    }
+
+    if (!hasDatabaseName(dbUrl)) {
+        throw new Error("ATLASDB_URL is missing a database name. Example: mongodb+srv://user:pass@cluster.mongodb.net/waterbnb?retryWrites=true&w=majority");
     }
 
     try {
