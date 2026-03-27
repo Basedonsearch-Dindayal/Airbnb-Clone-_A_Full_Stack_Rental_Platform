@@ -12,7 +12,7 @@ const ExpressError = require("./utils/ExpressError.js");
 const wrapAsync = require("./utils/wrapAsync.js");
 const session = require("express-session");
 const MongoStore = require('connect-mongo');
-const flash = require("connect-flash");
+const flash = require("./utils/flash.js");
 const passport = require("passport");
 const LocalStrategy = require("passport-local")
 const User = require("./models/user.js")
@@ -24,13 +24,22 @@ const userRouter = require("./routes/user.js");
 
 // MongoDB Connection
 const dbUrl = process.env.ATLASDB_URL;
-async function main() {
-    await mongoose.connect(dbUrl);
+async function connectDatabase() {
+    if (!dbUrl) {
+        console.error("ATLASDB_URL is not set. Running without database connection.");
+        return;
+    }
+
+    try {
+        await mongoose.connect(dbUrl);
+        console.log("Connected to MongoDB");
+    } catch (err) {
+        console.error("MongoDB connection failed:", err.message);
+        console.error("Verify ATLASDB_URL host/credentials and DNS settings.");
+    }
 }
 
-main()
-    .then(() => console.log("Connected to MongoDB"))
-    .catch((err) => console.log(err));
+connectDatabase();
 
 app.engine('ejs', ejsMate);
 app.set("view engine", "ejs");
@@ -40,20 +49,25 @@ app.use(express.json());
 app.use(methodOverride("_method"));
 app.use(express.static(path.join(__dirname, "public")));
 
-const store = MongoStore.create({
-    mongoUrl: dbUrl,
-    crypto:{
-        secret: process.env.SECRET,
-    },
-    touchAfter: 24*3600,
-});
+let store;
+if (dbUrl) {
+    store = MongoStore.create({
+        mongoUrl: dbUrl,
+        crypto: {
+            secret: process.env.SECRET,
+        },
+        touchAfter: 24 * 3600,
+        mongoOptions: {
+            serverSelectionTimeoutMS: 5000,
+        },
+    });
 
-store.on("error",()=>{
-    console.log("ERROR IN MONGO SESSION STORE",err);
-})
+    store.on("error", (err) => {
+        console.error("ERROR IN MONGO SESSION STORE", err.message);
+    });
+}
 
 const sessionOptions = {
-    store,
     secret : process.env.SECRET,
     resave : false,
     saveUninitialized: true,
@@ -63,6 +77,10 @@ const sessionOptions = {
         httpOnly : true,
     },
 };
+
+if (store) {
+    sessionOptions.store = store;
+}
 
 app.use(session(sessionOptions));
 app.use(flash());
