@@ -1,9 +1,13 @@
 const Listing = require("../models/listing")
-const Rview = require("../models/review")
 const Review = require("../models/review");
+const ExpressError = require("../utils/ExpressError");
 
 module.exports.renderNewReview = async (req, res) => {
     let listing = await Listing.findById(req.params.id);
+    if (!listing) {
+        throw new ExpressError(404, "Listing not found");
+    }
+
     let newReview = new Review(req.body.review);
     newReview.author = req.user._id;
     listing.reviews.push(newReview);
@@ -22,8 +26,14 @@ module.exports.destroyReview = async (req, res) => {
     if (!listing) {
         throw new ExpressError(404, "Listing not found");
     }
+
+    const review = await Review.findById(reviewId);
+    if (!review) {
+        throw new ExpressError(404, "Review not found");
+    }
+
     await Listing.findByIdAndUpdate(id, { $pull: { reviews: reviewId } });
-    await Review.findByIdAndDelete(reviewId);
+    await review.deleteOne();
     req.flash("success","Review Deleted!");
     res.redirect(`/listings/${id}`);
 }

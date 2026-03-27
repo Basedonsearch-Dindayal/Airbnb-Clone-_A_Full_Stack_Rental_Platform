@@ -26,7 +26,11 @@ const userRouter = require("./routes/user.js");
 const dbUrl = process.env.ATLASDB_URL;
 async function connectDatabase() {
     if (!dbUrl) {
-        console.error("ATLASDB_URL is not set. Running without database connection.");
+        const msg = "ATLASDB_URL is not set.";
+        if (process.env.NODE_ENV === "production") {
+            throw new Error(msg);
+        }
+        console.error(`${msg} Running without database connection in development.`);
         return;
     }
 
@@ -49,12 +53,17 @@ app.use(express.json());
 app.use(methodOverride("_method"));
 app.use(express.static(path.join(__dirname, "public")));
 
+const sessionSecret = process.env.SECRET || "dev-insecure-secret";
+if (!process.env.SECRET && process.env.NODE_ENV === "production") {
+    console.warn("SECRET is not set. Using fallback secret is insecure.");
+}
+
 let store;
 if (dbUrl) {
     store = MongoStore.create({
         mongoUrl: dbUrl,
         crypto: {
-            secret: process.env.SECRET,
+            secret: sessionSecret,
         },
         touchAfter: 24 * 3600,
         mongoOptions: {
@@ -68,7 +77,7 @@ if (dbUrl) {
 }
 
 const sessionOptions = {
-    secret : process.env.SECRET,
+    secret : sessionSecret,
     resave : false,
     saveUninitialized: true,
     cookie: {
@@ -117,6 +126,7 @@ app.use((err, req, res, next) => {
 });
 
 //port config
-app.listen(8080, () => {
-    console.log("Server is listening on port: 8080");
+const port = process.env.PORT || 8080;
+app.listen(port, () => {
+    console.log(`Server is listening on port: ${port}`);
 });

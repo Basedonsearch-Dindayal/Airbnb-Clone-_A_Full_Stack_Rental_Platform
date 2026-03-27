@@ -1,5 +1,7 @@
 const Listing = require("../models/listing")
 const mbxGeocoding = require('@mapbox/mapbox-sdk/services/geocoding');
+const mongoose = require("mongoose");
+const ExpressError = require("../utils/ExpressError");
 const mapToken = process.env.MAP_TOKEN;
 const geocodingClient = mbxGeocoding({ accessToken: mapToken});
 
@@ -14,27 +16,42 @@ module.exports.renderNewForm = (req, res) => {
 
 module.exports.showListing = async (req, res) => {
     let { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        req.flash("error", "Invalid listing link.");
+        return res.redirect("/listings");
+    }
+
     const listing = await Listing.findById(id).populate({path:"reviews",populate:{path:"author",},}).populate("owner"); 
     if(!listing){
-        req.flash("error","Listing you requested for does not exist!")
-        res.redirect("/listings");
+        req.flash("error","Listing you requested for does not exist!");
+        return res.redirect("/listings");
     }
     res.render("listings/show.ejs", { listing });
 }
 
 module.exports.createListing = async (req, res) => {
+    if (!mapToken) {
+        throw new ExpressError(500, "MAP_TOKEN is not configured on the server.");
+    }
+
     let response = await geocodingClient.forwardGeocode({
         query: req.body.listing.location,
         limit: 1
       })
         .send()
 
-    let url = req.file.path;
-    let filename = req.file.filename;
+    if (!response.body.features.length) {
+        throw new ExpressError(400, "Location could not be geocoded. Please enter a valid location.");
+    }
 
     const newListing = new Listing(req.body.listing);
     newListing.owner = req.user._id;
-    newListing.image = {url,filename}
+
+    if (req.file) {
+        let url = req.file.path;
+        let filename = req.file.filename;
+        newListing.image = { url, filename };
+    }
 
     newListing.geometry = response.body.features[0].geometry;
 
@@ -46,19 +63,33 @@ module.exports.createListing = async (req, res) => {
 
 module.exports.renderEditForm = async (req, res) => {
     let { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        req.flash("error", "Invalid listing link.");
+        return res.redirect("/listings");
+    }
+
     const listing = await Listing.findById(id);
     if(!listing){
-        req.flash("error","Listing you requested for does not exist!")
-        res.redirect("/listings");
+        req.flash("error","Listing you requested for does not exist!");
+        return res.redirect("/listings");
     }
     let originalImageUrl = listing.image.url;
-    originalImageUrl = originalImageUrl.replace("/uploud","/uploud/h_300,w_250");
+    originalImageUrl = originalImageUrl.replace("/upload", "/upload/h_300,w_250");
     res.render("listings/edit.ejs", { listing,originalImageUrl });
 }
 
 module.exports.updateListing = async (req, res) => {
     let { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        req.flash("error", "Invalid listing link.");
+        return res.redirect("/listings");
+    }
+
     let listing = await Listing.findByIdAndUpdate(id, { ...req.body.listing });
+    if (!listing) {
+        req.flash("error", "Listing you requested for does not exist!");
+        return res.redirect("/listings");
+    }
 
     if (req.file) {
         let url = req.file.path;
@@ -75,7 +106,17 @@ module.exports.updateListing = async (req, res) => {
 
 module.exports.destroyListing = async (req, res) => {
     let { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        req.flash("error", "Invalid listing link.");
+        return res.redirect("/listings");
+    }
+
     let deletedListing = await Listing.findByIdAndDelete(id);
+    if (!deletedListing) {
+        req.flash("error", "Listing you requested for does not exist!");
+        return res.redirect("/listings");
+    }
+
     console.log(deletedListing);
     req.flash("success","Listing Deleted!");
     res.redirect("/listings");
